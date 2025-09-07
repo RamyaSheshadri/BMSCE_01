@@ -22,20 +22,11 @@ module tb ();
   wire [7:0] uo_out;
   wire [7:0] uio_out;
   wire [7:0] uio_oe;
-`ifdef GL_TEST
-  wire VPWR = 1'b1;
-  wire VGND = 1'b0;
-`endif
+
+ integer A, B;  // <-- moved outside initial block
 
   // Replace tt_um_example with your module name:
-  tt_um_example user_project (
-
-      // Include power ports for the Gate Level test:
-`ifdef GL_TEST
-      .VPWR(VPWR),
-      .VGND(VGND),
-`endif
-
+tt_um_BMSCE_project_1 uut(
       .ui_in  (ui_in),    // Dedicated inputs
       .uo_out (uo_out),   // Dedicated outputs
       .uio_in (uio_in),   // IOs: Input path
@@ -45,5 +36,29 @@ module tb ();
       .clk    (clk),      // clock
       .rst_n  (rst_n)     // not reset
   );
+// Clock (not needed for combinational comparator, but required by wrapper)
+  initial clk = 0;
+  always #5 clk = ~clk;
 
-endmodule
+  // Test stimulus
+  initial begin
+    rst_n = 1;
+    ena = 1;
+    uio_in = 8'b0;
+
+    for (A = 0; A < 4; A = A + 1) begin
+      for (B = 0; B < 4; B = B + 1) begin
+        ui_in[1:0] = A;      // A[1:0]
+        ui_in[3:2] = B;      // B[1:0]
+        uio_in[7:4] = 4'b0;   // unused upper bits
+        #10;                 // wait for outputs to settle
+        $display("A=%b, B=%b => A_gt_B=%b, A_eq_B=%b, A_lt_B=%b", 
+          ui_in[1:0], ui_in[3:2], uo_out[0], uo_out[1], uo_out[2]);
+
+      end
+    end
+   
+  end
+
+endmodule 
+  
