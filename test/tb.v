@@ -42,8 +42,13 @@ tt_um_BMSCE_project_1 uut(
 
   // Test stimulus
   initial begin
-    rst_n = 1;
-    ena = 1;
+    rst_n = 0;      // assert reset
+ena = 1;        // keep enable high
+uio_in = 8'b0;  // initialize IO inputs
+#10;            // hold reset for 10ns
+rst_n = 1;      // release reset
+#10;            // wait a little for outputs to settle
+
     uio_in = 8'b0;
 
     for (A = 0; A < 4; A = A + 1) begin
