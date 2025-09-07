@@ -5,36 +5,43 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles
 
-
 @cocotb.test()
-async def test_project(dut):
-    dut._log.info("Start")
+async def test_comparator(dut):
+    dut._log.info("Starting 2-bit comparator test")
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, units="us")
+    # Clock setup (needed for Tiny Tapeout wrapper)
+    clock = Clock(dut.clk, 10, units="ns")
     cocotb.start_soon(clock.start())
 
     # Reset
-    dut._log.info("Reset")
+    dut.rst_n.value = 0
     dut.ena.value = 1
     dut.ui_in.value = 0
     dut.uio_in.value = 0
-    dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
+    await ClockCycles(dut.clk, 5)
     dut.rst_n.value = 1
+    await ClockCycles(dut.clk, 1)  # wait for reset release
 
-    dut._log.info("Test project behavior")
+    # Test all 2-bit combinations
+    for A in range(4):  # 0..3
+        for B in range(4):
+            dut.ui_in.value = (B << 2) | A  # ui_in[1:0]=A, ui_in[3:2]=B
+            await ClockCycles(dut.clk, 1)
 
-    # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 30
+            # Expected outputs
+            expected_gt = int(A > B)
+            expected_eq = int(A == B)
+            expected_lt = int(A < B)
 
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
+            # Read the DUT outputs as integer
+            uo_val = int(dut.uo_out.value)
 
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
+            # Bit positions: [0]=GT, [1]=EQ, [2]=LT
+            got_gt = (uo_val >> 0) & 1
+            got_eq = (uo_val >> 1) & 1
+            got_lt = (uo_val >> 2) & 1
 
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+            # Assert the outputs
+            assert got_gt == expected_gt, f"A={A}, B={B}, A>B mismatch"
+            assert got_eq == expected_eq, f"A={A}, B={B}, A=B mismatch"
+            assert got_lt == expected_lt, f"A={A}, B={B}, A<B mismatch"
