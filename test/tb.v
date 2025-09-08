@@ -42,9 +42,17 @@ tt_um_BMSCE_project_1 uut(
 
   // Test stimulus
   initial begin
-    rst_n = 1;
-    ena = 1;
-    uio_in = 8'b0;
+    // Initial conditions
+  clk    = 0;
+  rst_n  = 0;
+  ena    = 0;
+  ui_in  = 8'b0;
+  uio_in = 8'b0;
+
+  // Apply reset
+  #20;
+  rst_n = 1;
+  ena   = 1;
 
     for (A = 0; A < 4; A = A + 1) begin
       for (B = 0; B < 4; B = B + 1) begin
