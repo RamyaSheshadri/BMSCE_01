@@ -28,6 +28,7 @@ async def test_comparator(dut):
         for B in range(4):
             dut.ui_in.value = (B << 2) | A  # ui_in[1:0]=A, ui_in[3:2]=B
             await ClockCycles(dut.clk, 1)
+            await cocotb.triggers.Timer(1, units="ns")
 
             # Expected outputs
             expected_gt = int(A > B)
