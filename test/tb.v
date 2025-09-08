@@ -56,9 +56,11 @@ tt_um_BMSCE_project_1 uut(
 
     for (A = 0; A < 4; A = A + 1) begin
       for (B = 0; B < 4; B = B + 1) begin
-        ui_in[1:0] = A;      // A[1:0]
-        ui_in[3:2] = B;      // B[1:0]
-        uio_in[7:4] = 4'b0;   // unused upper bits
+     ui_in = 8'b0;          // clear all 8 bits of ui_in
+    ui_in[1:0] = A;        // A[1:0]
+    ui_in[3:2] = B;        // B[1:0]
+
+    uio_in = 8'b0;         // clear uio_in fully
         #10;                 // wait for outputs to settle
         $display("A=%b, B=%b => A_gt_B=%b, A_eq_B=%b, A_lt_B=%b", 
           ui_in[1:0], ui_in[3:2], uo_out[0], uo_out[1], uo_out[2]);
