@@ -15,12 +15,9 @@ module tt_um_BMSCE_project_1 (
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 );
-
-   // Split inputs
-  wire A1 = ui_in[1];
-  wire A0 = ui_in[0];
-  wire B1 = ui_in[3];
-  wire B0 = ui_in[2];
+// Inputs
+wire [1:0] A = ui_in[1:0];
+wire [1:0] B = ui_in[3:2];
 
   // Explicit Boolean equations
   assign uo_out[1] = (~(A1 ^ B1)) & (~(A0 ^ B0));                        // A == B
